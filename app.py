@@ -13,16 +13,19 @@ scope = [
     "https://spreadsheets.google.com/feeds",
     "https://www.googleapis.com/auth/drive",
 ]
-# Nama file kunci rahasia Anda
-# NAMA_FILE_KUNCI = "kunci_rahasia.json"
+# Nama file kunci rahasia Anda (sudah tidak dipakai, diganti Secrets)
+# NAMA_FILE_KUNCI = "kunci_rahasia.json" 
 # Nama Google Sheet Anda
 NAMA_SHEET = "DataHarmoniFinansial"  # <-- GANTI INI JIKA NAMA SHEET ANDA BEDA
 
 # Fungsi untuk mengautentikasi (menghubungkan) ke Google Sheets
 @st.cache_resource
 def get_client():
-creds_dict = st.secrets["gcp_service_account"]
-creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
+    # --- INI BAGIAN YANG DIPERBAIKI ---
+    # Tambahkan 4 spasi di depan 2 baris ini
+    creds_dict = st.secrets["gcp_service_account"]
+    creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
+    # -----------------------------------
     client = gspread.authorize(creds)
     return client
 
@@ -238,5 +241,4 @@ if st.checkbox("Tampilkan data aset?"):
     if not df_aset.empty:
         st.dataframe(df_aset)
     else:
-
         st.info("Tidak ada data aset.")
