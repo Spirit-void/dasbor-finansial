@@ -4,28 +4,29 @@ from oauth2client.service_account import ServiceAccountCredentials
 import pandas as pd
 import plotly.express as px
 from datetime import datetime
+import json # <-- PENTING: Pustaka ini dibutuhkan untuk membaca secrets dari Streamlit
 
 # =======================================================================
-#  KONFIGURASI KONEKSI Google Sheets
+# KONFIGURASI KONEKSI Google Sheets
 # =======================================================================
 # Ini adalah "scope" atau izin yang kita perlukan
 scope = [
     "https://spreadsheets.google.com/feeds",
     "https://www.googleapis.com/auth/drive",
 ]
-# Nama file kunci rahasia Anda (sudah tidak dipakai, diganti Secrets)
-# NAMA_FILE_KUNCI = "kunci_rahasia.json" 
 # Nama Google Sheet Anda
 NAMA_SHEET = "DataHarmoniFinansial"  # <-- GANTI INI JIKA NAMA SHEET ANDA BEDA
 
 # Fungsi untuk mengautentikasi (menghubungkan) ke Google Sheets
 @st.cache_resource
 def get_client():
-    # --- INI BAGIAN YANG DIPERBAIKI ---
-    # Tambahkan 4 spasi di depan 2 baris ini
-    creds_dict = st.secrets["gcp_service_account"]
+    # Mengambil kunci rahasia dari Streamlit Secrets
+    creds_text = st.secrets["gcp_service_account"]
+    # Mengubah teks JSON (string) menjadi kamus Python (dict)
+    creds_dict = json.loads(creds_text)
+    
+    # Membuat kredensial dari kamus
     creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
-    # -----------------------------------
     client = gspread.authorize(creds)
     return client
 
@@ -52,7 +53,7 @@ def get_data_as_dataframe(nama_worksheet):
     return pd.DataFrame()
 
 # =======================================================================
-#  PENGATURAN HALAMAN WEB
+# PENGATURAN HALAMAN WEB
 # =======================================================================
 st.set_page_config(
     page_title="Dasbor Harmoni Finansial",
@@ -64,7 +65,7 @@ st.title("💸 Dasbor Harmoni Finansial")
 st.markdown("Tempat memantau aset dan arus kas kita bersama.")
 
 # =======================================================================
-#  MEMUAT DATA
+# MEMUAT DATA
 # =======================================================================
 # Kita gunakan st.cache_data agar tidak perlu ambil data terus-menerus
 @st.cache_data(ttl=60)  # Cache data selama 60 detik
@@ -86,7 +87,7 @@ def load_data():
 df_transaksi, df_aset = load_data()
 
 # =======================================================================
-#  BAGIAN UTAMA: TAMPILAN ANGKA (METRICS)
+# BAGIAN UTAMA: TAMPILAN ANGKA (METRICS)
 # =======================================================================
 if not df_transaksi.empty and not df_aset.empty:
     # Hitung Pemasukan
@@ -114,7 +115,7 @@ else:
 st.markdown("---")
 
 # =======================================================================
-#  BAGIAN VISUALISASI (GRAFIK)
+# BAGIAN VISUALISASI (GRAFIK)
 # =======================================================================
 col_grafik1, col_grafik2 = st.columns(2)
 
@@ -156,7 +157,7 @@ with col_grafik2:
 st.markdown("---")
 
 # =======================================================================
-#  BAGIAN INPUT DATA (FORM)
+# BAGIAN INPUT DATA (FORM)
 # =======================================================================
 st.subheader("Input Data Baru")
 
@@ -226,7 +227,7 @@ with form_col2:
 
 
 # =======================================================================
-#  BAGIAN TAMPILKAN DATA MENTAH (Opsional)
+# BAGIAN TAMPILKAN DATA MENTAH (Opsional)
 # =======================================================================
 st.markdown("---")
 st.subheader("Data Mentah dari Google Sheet")
