@@ -22,6 +22,12 @@ NAMA_SHEET = "DataHarmoniFinansial"  # <-- GANTI INI JIKA NAMA SHEET ANDA BEDA
 def get_client():
     # Mengambil kunci rahasia dari Streamlit Secrets
     creds_text = st.secrets["gcp_service_account"]
+    
+    # 🚨 PENTING: Periksa apakah secrets berhasil diambil
+    if creds_text is None:
+        st.error("Gagal membaca secrets. Pastikan kunci 'gcp_service_account' sudah tersimpan dengan format TOML yang benar di Streamlit Secrets.")
+        raise ValueError("Streamlit secrets key 'gcp_service_account' is empty or not found.")
+        
     # Mengubah teks JSON (string) menjadi kamus Python (dict)
     creds_dict = json.loads(creds_text)
     
